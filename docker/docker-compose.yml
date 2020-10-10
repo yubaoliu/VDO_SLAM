@@ -1,0 +1,21 @@
+version: '2.3'
+services:
+  orbslam3:
+    image: yubaoliu/vdo-slam:melodic
+    build:
+        context: .
+    container_name: vdo-slam
+    privileged: true
+    runtime: nvidia
+    command: lxterminal
+    environment:
+        - DISPLAY
+        - QT_X11_NO_MITSHM=1
+    volumes:
+        - /tmp/.X11-unix:/tmp/.X11-unix:rw
+        - ../:/root/catkin_ws/src/vdo-slam
+        - ${DATASET_DIR}:/root/Dataset
+    network_mode: host
+    entrypoint: /ros_entrypoint.sh
+volumes:
+    vdo-slam:
