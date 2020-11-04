@@ -1,3 +1,11 @@
+# Requirement
+
+- OpenCV >= 3.3 && opencv_contrib
+- Ubuntu
+
+
+---
+
 # VDO-SLAM
 **Authors:** [Jun Zhang*](https://halajun.github.io/), [Mina Henein*](https://minahenein.github.io/), [Robert Mahony](https://users.cecs.anu.edu.au/~Robert.Mahony/) and [Viorela Ila](http://viorelaila.net/) 
 (*equally contributed)

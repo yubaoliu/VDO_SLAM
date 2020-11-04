@@ -5,7 +5,7 @@ cd dependencies/g2o
 mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j
+make -j 2
 
 cd ../../../
 
@@ -14,4 +14,4 @@ echo "Configuring and building VDO-SLAM ..."
 mkdir build
 cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
-make -j
+make -j 2

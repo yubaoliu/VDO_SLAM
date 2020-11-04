@@ -31,13 +31,16 @@ endif()
 LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake_modules)
 
 
-find_package(OpenCV 3.0 QUIET)
+# find_package(OpenCV 3.0 REQUIRED )
+find_package(OpenCV 3.4.0 REQUIRED )
 if(NOT OpenCV_FOUND)
    find_package(OpenCV 2.4.3 QUIET)
    if(NOT OpenCV_FOUND)
       message(FATAL_ERROR "OpenCV > 2.4.3 not found.")
    endif()
 endif()
+
+message(STATUS "OpenCV Version:OpenCV Version:  " ${OpenCV_VERSION})
 
 find_package(Eigen3 3.1.0 REQUIRED)
 find_package(CSparse REQUIRED)
@@ -47,6 +50,7 @@ ${PROJECT_SOURCE_DIR}
 ${PROJECT_SOURCE_DIR}/include
 ${EIGEN3_INCLUDE_DIR}
 ${CSPARSE_INCLUDE_DIR}
+${OpenCV_INCLUDE_DIRS} 
 )
 
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
@@ -73,9 +77,9 @@ ${OpenCV_LIBS}
 ${EIGEN3_LIBS}
 ${CSPARSE_LIBRARY}
 # for mac os (default)
-${PROJECT_SOURCE_DIR}/dependencies/g2o/lib/libg2o.dylib
+# ${PROJECT_SOURCE_DIR}/dependencies/g2o/lib/libg2o.dylib
 # for linux (ubuntu)
-#${PROJECT_SOURCE_DIR}/dependencies/g2o/lib/libg2o.so
+${PROJECT_SOURCE_DIR}/dependencies/g2o/lib/libg2o.so
 )
 
 
