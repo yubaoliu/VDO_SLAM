@@ -679,6 +679,7 @@ void Tracking::Track()
         double cam_pos_time;
         s_1_1 = clock();
         // Get initial estimate using P3P plus RanSac
+        // TemperalMatch_subset 中保留使用RANSAC检测出的外点后的那些匹配点
         cv::Mat iniTcw = GetInitModelCam(TemperalMatch,TemperalMatch_subset);
         e_1_1 = clock();
 
@@ -689,6 +690,7 @@ void Tracking::Track()
         // // compute the pose with new matching
         mCurrentFrame.SetPose(iniTcw);
         if (bJoint)
+            // 结合Optical flow来优化相机位姿与物体位姿
             Optimizer::PoseOptimizationFlow2Cam(&mCurrentFrame, &mLastFrame, TemperalMatch_subset);
         else
             Optimizer::PoseOptimizationNew(&mCurrentFrame, &mLastFrame, TemperalMatch_subset);
@@ -698,7 +700,7 @@ void Tracking::Track()
         all_timing[1] = cam_pos_time;
         // cout << "camera pose estimation time: " << cam_pos_time << endl;
 
-        // Update motion model
+        // Update motion model, 更新当前速度 mVelocity，同ORB SLAM
         if(!mLastFrame.mTcw.empty())
         {
             cv::Mat LastTwc = cv::Mat::eye(4,4,CV_32F);
@@ -715,11 +717,13 @@ void Tracking::Track()
         cv::Mat T_lc_inv = mCurrentFrame.mTcw*Converter::toInvMatrix(mLastFrame.mTcw);
         cv::Mat T_lc_gt = mLastFrame.mTcw_gt*Converter::toInvMatrix(mCurrentFrame.mTcw_gt);
         cv::Mat RePoEr_cam = T_lc_inv*T_lc_gt;
-
+        // 计算RPE error， 位移的平方和
         float t_rpe_cam = std::sqrt( RePoEr_cam.at<float>(0,3)*RePoEr_cam.at<float>(0,3) + RePoEr_cam.at<float>(1,3)*RePoEr_cam.at<float>(1,3) + RePoEr_cam.at<float>(2,3)*RePoEr_cam.at<float>(2,3) );
+        // 计算旋转矩阵的迹
         float trace_rpe_cam = 0;
         for (int i = 0; i < 3; ++i)
         {
+            // TODO 为何要与1.0进行比较 ？
             if (RePoEr_cam.at<float>(i,i)>1.0)
                  trace_rpe_cam = trace_rpe_cam + 1.0-(RePoEr_cam.at<float>(i,i)-1.0);
             else
@@ -1408,11 +1412,13 @@ std::vector<std::vector<int> > Tracking::DynObjTracking()
             const float u = mCurrentFrame.mvObjKeys[Posi[i][j]].pt.x;
             const float v = mCurrentFrame.mvObjKeys[Posi[i][j]].pt.y;
             if ( v<shrin_thr_row || v>(mImGray.rows-shrin_thr_row) || u<shrin_thr_col || u>(mImGray.cols-shrin_thr_col) )
+            // 统计物体位于边界上的点的个数
                 count = count + 1;
         }
         if (count/Posi[i].size()>count_thres)
         {
             // cout << "Most part of this object is on the image boundary......" << endl;
+            // 如果物体处于边界上，那么将这个物体标记为outlier
             for (int k = 0; k < Posi[i].size(); ++k)
                 mCurrentFrame.vObjLabel[Posi[i][k]] = -1;
             continue;
@@ -1420,23 +1426,29 @@ std::vector<std::vector<int> > Tracking::DynObjTracking()
         else
         {
             ObjId.push_back(Posi[i]);
+            // 保存物体id所对应的semantic label
             sem_posi.push_back(UniLab[i]);
         }
     }
 
-    // // Check scene flow distribution of each object and keep the dynamic object
+    // // Check scene flow (sf) distribution of each object and keep the dynamic object
     std::vector<std::vector<int> > ObjIdNew;
     std::vector<int> SemPosNew, obj_dis_tres(sem_posi.size(),0);
+    // 遍历所有物体
     for (int i = 0; i < ObjId.size(); ++i)
     {
 
         float obj_center_depth = 0, sf_min=100, sf_max=0, sf_mean=0, sf_count=0;
+        // TODO sf_range 有什么用处？
         std::vector<int> sf_range(10,0);
+        // 遍历单个物体上的所有特征点
         for (int j = 0; j < ObjId[i].size(); ++j)
         {
             obj_center_depth = obj_center_depth + mCurrentFrame.mvObjDepth[ObjId[i][j]];
             // const float sf_norm = cv::norm(mCurrentFrame.vFlow_3d[ObjId[i][j]]);
+            // TODO 为何不使用y坐标？
             float sf_norm = std::sqrt(mCurrentFrame.vFlow_3d[ObjId[i][j]].x*mCurrentFrame.vFlow_3d[ObjId[i][j]].x + mCurrentFrame.vFlow_3d[ObjId[i][j]].z*mCurrentFrame.vFlow_3d[ObjId[i][j]].z);
+            // magnitude threashold
             if (sf_norm<fSFMgThres)
                 sf_count = sf_count+1;
             if(sf_norm<sf_min)
@@ -1472,7 +1484,7 @@ std::vector<std::vector<int> > Tracking::DynObjTracking()
         // for (int j = 0; j < sf_range.size(); ++j)
         //     cout << sf_range[j] << " ";
         // cout << endl;
-
+        // distribution threshold
         if (sf_count/ObjId[i].size()>fSFDsThres)
         {
             // label this object as static background
@@ -1480,6 +1492,7 @@ std::vector<std::vector<int> > Tracking::DynObjTracking()
                 mCurrentFrame.vObjLabel[ObjId[i][k]] = 0;
             continue;
         }
+        // 物体太远或者太小
         else if (obj_center_depth/ObjId[i].size()>mThDepthObj || ObjId[i].size()<150)
         {
             obj_dis_tres[i]=-1;
