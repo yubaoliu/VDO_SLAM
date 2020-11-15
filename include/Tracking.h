@@ -143,9 +143,9 @@ public:
 
     // ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-    cv::Mat mImGrayLast;  // ++++++ new added
+    cv::Mat mImGrayLast;
 
-    // new added (Nov 14 2019)
+    // new added
     cv::Mat mFlowMap, mFlowMapLast;
     cv::Mat mDepthMap;
     cv::Mat mSegMap, mSegMapLast;
@@ -154,10 +154,10 @@ public:
     cv::Mat mOriginInv;
 
     // Store temperal matching feature index
-    bool bFrame2Frame,bFirstFrame;  // ++++++ new added
-    std::vector<int> TemperalMatch, TemperalMatch_subset;  // ++++++ new added
-    std::vector<cv::KeyPoint> mvKeysLastFrame, mvKeysCurrentFrame;  // ++++++ new added
-
+    bool bFrame2Frame,bFirstFrame;
+    std::vector<int> TemperalMatch, TemperalMatch_subset;
+    std::vector<cv::KeyPoint> mvKeysLastFrame, mvKeysCurrentFrame;
+    
     std::vector<cv::KeyPoint> mvTmpObjKeys;
     std::vector<float> mvTmpObjDepth;
     std::vector<int> mvTmpSemObjLabel;

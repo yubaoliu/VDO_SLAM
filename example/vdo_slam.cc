@@ -19,6 +19,7 @@
 #include<System.h>
 
 using namespace std;
+// Camera Ground truth: FrameID R11 R12 R13 t1 R21 R22 R23 t2 R31 R32 R33 t3 0 0 0 1
 
 void LoadData(const string &strPathToSequence, vector<string> &vstrFilenamesSEM,
               vector<string> &vstrFilenamesRGB, vector<string> &vstrFilenamesDEP, vector<string> &vstrFilenamesFLO,
@@ -35,18 +36,25 @@ int main(int argc, char **argv)
     }
 
     // Retrieve paths to images
+    // 存放所有RGB图像
     vector<string> vstrFilenamesRGB;
+    // 存放的有深度图像
     vector<string> vstrFilenamesDEP;
+    // 存放所有的 semantic label图像
     vector<string> vstrFilenamesSEM;
+    // 读取所有的 Optical Flow数据
     vector<string> vstrFilenamesFLO;
+    // 相机Pose 的真值
     std::vector<cv::Mat> vPoseGT;
+    // 物体位姿的真值
     vector<vector<float> > vObjPoseGT;
     vector<double> vTimestamps;
-
+    // 读取数据集， 本文使用了OMD数据集与KITTI数据集，事先要进行语义分割与预测稠密Optical Flow，以及物体位姿的真值
     LoadData(argv[2], vstrFilenamesSEM, vstrFilenamesRGB, vstrFilenamesDEP, vstrFilenamesFLO,
                   vTimestamps, vPoseGT, vObjPoseGT);
 
     // save the id of object pose in each frame
+    // TODO 按递增的顺序不重复编号 （为什么要这么编号？）
     vector<vector<int> > vObjPoseID(vstrFilenamesRGB.size());
     for (int i = 0; i < vObjPoseGT.size(); ++i)
     {
@@ -217,6 +225,7 @@ void LoadData(const string &strPathToSequence, vector<string> &vstrFilenamesSEM,
 
 
     // +++ ground truth object pose +++
+    // KITI: FrameID ObjectID B1 B2 B3 B4 t1 t2 t3 r1
     string strFilenameObjPose = strPathToSequence + "/object_pose.txt";
     ifstream fObjPose;
     fObjPose.open(strFilenameObjPose.c_str());

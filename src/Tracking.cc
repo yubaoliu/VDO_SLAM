@@ -63,6 +63,7 @@ Tracking::Tracking(System *pSys, Map *pMap, const string &strSettingPath, const 
     K.at<float>(1,2) = cy;
     K.copyTo(mK);
 
+    // distortion parameters
     cv::Mat DistCoef(4,1,CV_32F);
     DistCoef.at<float>(0) = fSettings["Camera.k1"];
     DistCoef.at<float>(1) = fSettings["Camera.k2"];
@@ -167,6 +168,7 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB, cv::Mat &imD, const cv::Ma
 {
     // initialize some paras
     StopFrame = nImage-1;
+    // 使用Optical flow进行联合优化
     bJoint = true;
     cv::RNG rng((unsigned)time(NULL));
 
@@ -216,7 +218,7 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB, cv::Mat &imD, const cv::Ma
             cvtColor(mImGray,mImGray,CV_BGRA2GRAY);
     }
 
-    // Save map in the tracking head (new added Nov 14 2019)
+    // Save map in the tracking head
     mDepthMap = imD;
     mFlowMap = imFlow;
     mSegMap = maskSEM;
@@ -224,7 +226,6 @@ cv::Mat Tracking::GrabImageRGBD(const cv::Mat &imRGB, cv::Mat &imD, const cv::Ma
     // Initialize timing vector (Output)
     all_timing.resize(5,0);
 
-    // (new added Nov 21 2019)
     if (mState!=NO_IMAGES_YET)
     {
         clock_t s_0, e_0;
@@ -1025,16 +1026,16 @@ void Tracking::Track()
         cout << "Assign To Lastframe ......" << endl;
 
         // // ====== Update from current to last frames ======
-        mvKeysLastFrame = mLastFrame.mvStatKeys;  // new added (1st Dec)  mvStatKeys <-> mvKeys
-        mvKeysCurrentFrame = mCurrentFrame.mvStatKeys; // new added (12th Sep)
+        mvKeysLastFrame = mLastFrame.mvStatKeys;  //  mvStatKeys <-> mvKeys
+        mvKeysCurrentFrame = mCurrentFrame.mvStatKeys;
 
         mLastFrame = Frame(mCurrentFrame);  // this is very important!!!
-        mLastFrame.mvObjKeys = mCurrentFrame.mvObjKeys;  // new added Nov 19 2019
-        mLastFrame.mvObjDepth = mCurrentFrame.mvObjDepth;  // new added Nov 19 2019
-        mLastFrame.vSemObjLabel = mCurrentFrame.vSemObjLabel; // new added Nov 19 2019
+        mLastFrame.mvObjKeys = mCurrentFrame.mvObjKeys;
+        mLastFrame.mvObjDepth = mCurrentFrame.mvObjDepth;
+        mLastFrame.vSemObjLabel = mCurrentFrame.vSemObjLabel;
 
-        mLastFrame.mvStatKeys = mCurrentFrame.mvStatKeysTmp; // new added Jul 30 2019
-        mLastFrame.mvStatDepth = mCurrentFrame.mvStatDepthTmp;  // new added Jul 30 2019
+        mLastFrame.mvStatKeys = mCurrentFrame.mvStatKeysTmp;
+        mLastFrame.mvStatDepth = mCurrentFrame.mvStatDepthTmp;
 
         // // ================================================
 
@@ -1049,22 +1050,22 @@ void Tracking::Track()
         // (1) detected static features, corresponding depth and associations
         mpMap->vpFeatSta.push_back(mCurrentFrame.mvStatKeysTmp);
         mpMap->vfDepSta.push_back(mCurrentFrame.mvStatDepthTmp);
-        mpMap->vp3DPointSta.push_back(mCurrentFrame.mvStat3DPointTmp);  // (new added Dec 12 2019)
-        mpMap->vnAssoSta.push_back(mCurrentFrame.nStaInlierID);         // (new added Nov 14 2019)
+        mpMap->vp3DPointSta.push_back(mCurrentFrame.mvStat3DPointTmp);
+        mpMap->vnAssoSta.push_back(mCurrentFrame.nStaInlierID);      
 
         // (2) detected dynamic object features, corresponding depth and associations
-        mpMap->vpFeatDyn.push_back(mCurrentFrame.mvObjKeys);           // (new added Nov 20 2019)
-        mpMap->vfDepDyn.push_back(mCurrentFrame.mvObjDepth);           // (new added Nov 20 2019)
-        mpMap->vp3DPointDyn.push_back(mCurrentFrame.mvObj3DPoint);     // (new added Dec 12 2019)
-        mpMap->vnAssoDyn.push_back(mCurrentFrame.nDynInlierID);        // (new added Nov 20 2019)
-        mpMap->vnFeatLabel.push_back(mCurrentFrame.vObjLabel);         // (new added Nov 20 2019)
+        mpMap->vpFeatDyn.push_back(mCurrentFrame.mvObjKeys);           
+        mpMap->vfDepDyn.push_back(mCurrentFrame.mvObjDepth);          
+        mpMap->vp3DPointDyn.push_back(mCurrentFrame.mvObj3DPoint);     
+        mpMap->vnAssoDyn.push_back(mCurrentFrame.nDynInlierID);        
+        mpMap->vnFeatLabel.push_back(mCurrentFrame.vObjLabel);        
 
         if (f_id==StopFrame || bLocalBatch)
         {
             // (3) save static feature tracklets
             mpMap->TrackletSta = GetStaticTrack();
             // (4) save dynamic feature tracklets
-            mpMap->TrackletDyn = GetDynamicTrackNew();  // (new added Nov 20 2019)
+            mpMap->TrackletDyn = GetDynamicTrackNew();  
         }
 
         // (5) camera pose
@@ -1234,13 +1235,13 @@ void Tracking::Initialization()
     }
 
     // (1) save detected static features and corresponding depth
-    mpMap->vpFeatSta.push_back(mCurrentFrame.mvStatKeysTmp);  // modified Nov 14 2019
-    mpMap->vfDepSta.push_back(mCurrentFrame.mvStatDepthTmp);  // modified Nov 14 2019
-    mpMap->vp3DPointSta.push_back(mCurrentFrame.mvStat3DPointTmp);  // modified Dec 17 2019
+    mpMap->vpFeatSta.push_back(mCurrentFrame.mvStatKeysTmp);  
+    mpMap->vfDepSta.push_back(mCurrentFrame.mvStatDepthTmp);  
+    mpMap->vp3DPointSta.push_back(mCurrentFrame.mvStat3DPointTmp);  
     // (2) save detected dynamic object features and corresponding depth
-    mpMap->vpFeatDyn.push_back(mCurrentFrame.mvObjKeys);  // modified Nov 19 2019
-    mpMap->vfDepDyn.push_back(mCurrentFrame.mvObjDepth);  // modified Nov 19 2019
-    mpMap->vp3DPointDyn.push_back(mCurrentFrame.mvObj3DPoint);  // modified Dec 17 2019
+    mpMap->vpFeatDyn.push_back(mCurrentFrame.mvObjKeys);  
+    mpMap->vfDepDyn.push_back(mCurrentFrame.mvObjDepth);  
+    mpMap->vp3DPointDyn.push_back(mCurrentFrame.mvObj3DPoint);  
     // (3) save camera pose
     mpMap->vmCameraPose.push_back(cv::Mat::eye(4,4,CV_32F));
     mpMap->vmCameraPose_RF.push_back(cv::Mat::eye(4,4,CV_32F));
@@ -1258,14 +1259,14 @@ void Tracking::Initialization()
     // cout << "current pose inverse: " << endl << mOriginInv << endl;
 
     mLastFrame = Frame(mCurrentFrame);  //  important !!!
-    mLastFrame.mvObjKeys = mCurrentFrame.mvObjKeys; // new added Jul 30 2019
-    mLastFrame.mvObjDepth = mCurrentFrame.mvObjDepth;  // new added Jul 30 2019
-    mLastFrame.vSemObjLabel = mCurrentFrame.vSemObjLabel; // new added Aug 2 2019
+    mLastFrame.mvObjKeys = mCurrentFrame.mvObjKeys; 
+    mLastFrame.mvObjDepth = mCurrentFrame.mvObjDepth;  
+    mLastFrame.vSemObjLabel = mCurrentFrame.vSemObjLabel; 
 
-    mLastFrame.mvStatKeys = mCurrentFrame.mvStatKeysTmp; // new added Jul 30 2019
-    mLastFrame.mvStatDepth = mCurrentFrame.mvStatDepthTmp;  // new added Jul 30 2019
-    mLastFrame.N_s = mCurrentFrame.N_s_tmp; // new added Nov 14 2019
-    mvKeysLastFrame = mLastFrame.mvStatKeys; // +++ new added +++
+    mLastFrame.mvStatKeys = mCurrentFrame.mvStatKeysTmp; 
+    mLastFrame.mvStatDepth = mCurrentFrame.mvStatDepthTmp;  
+    mLastFrame.N_s = mCurrentFrame.N_s_tmp; 
+    mvKeysLastFrame = mLastFrame.mvStatKeys; 
 
     mState=OK;
 

@@ -61,18 +61,18 @@ public:
     // rigid motion of camera and dynamic points. (k-1)*m
     std::vector<std::vector<cv::Mat> > vmRigidCentre;  // ground truth object center
     std::vector<std::vector<cv::Mat> > vmRigidMotion;
-    std::vector<std::vector<cv::Mat> > vmObjPosePre; // for new metric 26 Feb 2020
+    std::vector<std::vector<cv::Mat> > vmObjPosePre; 
     std::vector<std::vector<cv::Mat> > vmRigidMotion_RF;  // refine result
     std::vector<std::vector<cv::Mat> > vmRigidMotion_GT;  // ground truth result
     std::vector<std::vector<float> > vfAllSpeed_GT; // camera and object speeds
     // rigid motion label in each frame (k-1)*m
     // 0 stands for camera motion; 1,...,l stands for rigid motions.
-    std::vector<std::vector<int> > vnRMLabel; // tracking label
+    std::vector<std::vector<int> > vnRMLabel; // tracking label (RM:= rigid motion ?)
     std::vector<std::vector<int> > vnSMLabel; // semantic label
     std::vector<std::vector<int> > vnSMLabelGT;
-    // object status (10 Jan 2020)
+    // object status
     std::vector<std::vector<bool> > vbObjStat;
-    // object tracking times (10 Jan 2020)
+    // object tracking times
     std::vector<std::vector<int> > vnObjTraTime;
     std::vector<int> nObjTraCount;
     std::vector<int> nObjTraCountGT;

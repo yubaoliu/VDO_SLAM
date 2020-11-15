@@ -1,8 +1,32 @@
+
+Blog: https://www.ybliu.com/2020/10/vdoslam.html
+
 # Requirement
 
-- OpenCV >= 3.3 && opencv_contrib
+- OpenCV >= 3.3
+- opencv_contrib
 - Ubuntu
+- libsuitesparse-dev
 
+# Build
+
+```sh
+build.sh
+```
+
+# Run Demo
+
+OMD:
+
+```sh 
+./example/vdo_slam ./example/omd.yaml /root/Dataset/VDO-SLAM/demo-omd
+```
+
+KITTI:
+
+```sh
+./example/vdo_slam example/kitti-0000-0013.yaml /root/Dataset/VDO-SLAM/demo-kitti
+```
 
 ---
 

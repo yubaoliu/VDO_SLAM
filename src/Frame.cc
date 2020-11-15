@@ -106,10 +106,10 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const cv::Mat &imFlo
             int x = mvKeys[i].pt.x;
             int y = mvKeys[i].pt.y;
 
-            if (maskSEM.at<int>(y,x)!=0)  // new added in Jun 13 2019
+            if (maskSEM.at<int>(y,x)!=0)
                 continue;
 
-            if (imDepth.at<float>(y,x)>mThDepth || imDepth.at<float>(y,x)<=0)  // new added in Aug 21 2019
+            if (imDepth.at<float>(y,x)>mThDepth || imDepth.at<float>(y,x)<=0)
                 continue;
 
             float flow_xe = imFlow.at<cv::Vec2f>(y,x)[0];
@@ -144,10 +144,10 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const cv::Mat &imFlo
             int x = mvKeysSamp[i].pt.x;
             int y = mvKeysSamp[i].pt.y;
 
-            if (maskSEM.at<int>(y,x)!=0)  // new added in Jun 13 2019
+            if (maskSEM.at<int>(y,x)!=0)
                 continue;
 
-            if (imDepth.at<float>(y,x)>mThDepth || imDepth.at<float>(y,x)<=0)  // new added in Aug 21 2019
+            if (imDepth.at<float>(y,x)>mThDepth || imDepth.at<float>(y,x)<=0)
                 continue;
 
             float flow_xe = imFlow.at<cv::Vec2f>(y,x)[0];
@@ -194,7 +194,7 @@ Frame::Frame(const cv::Mat &imGray, const cv::Mat &imDepth, const cv::Mat &imFlo
     }
 
     // ---------------------------------------------------------------------------------------
-    // ++++++++++++++++++++++++++++ New added for dense object features ++++++++++++++++++++++
+    // +++++++++++++++++++++++for dense object features ++++++++++++++++++++++
     // ---------------------------------------------------------------------------------------
 
     // semi-dense features on objects
